@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>身份确认</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;height:100%;
+    background:#0a1f4a;                 /* 深蓝背景 */
+    font-family:"宋体",SimSun,"Songti SC","Noto Serif SC",serif;  /* 宋体 */
+    overflow:hidden;
+    user-select:none;-webkit-user-select:none;
+  }
+
+  /* ---------- 开场页 ---------- */
+  #stage{
+    position:fixed;inset:0;z-index:2;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:#0a1f4a;
+    cursor:pointer;
+    transition:opacity .55s ease;
+  }
+  #stage.hidden{opacity:0;pointer-events:none;}
+
+  #intro{
+    color:#fff;
+    font-size:clamp(16px,2.2vw,26px);
+    line-height:2;
+    letter-spacing:3px;
+    text-align:center;
+    max-width:min(88vw,900px);
+    margin:0 0 clamp(28px,5vh,56px);
+  }
+  #enter-btn{
+    font-family:inherit;
+    font-size:clamp(15px,1.6vw,20px);
+    letter-spacing:6px;
+    color:#fff;
+    background:transparent;
+    border:1px solid #fff;
+    padding:12px 40px;
+    cursor:pointer;
+    transition:background .3s,color .3s;
+  }
+  #enter-btn:hover{background:#fff;color:#0a1f4a;}
+
+  /* ---------- 牌桌 ---------- */
+  #board-wrap{
+    position:fixed;inset:0;z-index:1;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+    transition:opacity .55s ease;
+  }
+  #board-wrap.show{opacity:1;pointer-events:auto;}
+
+  #board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:clamp(8px,1.6vmin,18px);
+    width:min(88vw,76vh);
+    height:min(88vw,76vh);
+  }
+
+  .card{perspective:1000px;cursor:pointer;}
+
+  .card-inner{
+    position:relative;width:100%;height:100%;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+
+  .face{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;
+    padding:6px;
+    border-radius:10px;
+    color:#fff;                          /* 白色字 */
+    background:#000;                     /* 黑色卡片 */
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    letter-spacing:2px;
+  }
+  .front{font-size:clamp(15px,2.1vw,26px);}
+  .back{
+    transform:rotateY(180deg);
+    font-size:clamp(11px,1.4vw,18px);
+    line-height:1.5;
+    letter-spacing:1px;
+    border:1px solid rgba(255,255,255,.35);
+  }
+  .card:not(.flipped):hover .card-inner{transform:translateY(-4px);}
+</style>
+</head>
+<body>
+
+<!-- 开场 -->
+<div id="stage">
+  <p id="intro">现在你可以通过点击卡牌的方式来确认以下角色的真实身份</p>
+  <button id="enter-btn" type="button">点击查看</button>
+</div>
+
+<!-- 牌桌 -->
+<div id="board-wrap">
+  <div id="board"></div>
+</div>
+
+<script>
+/* 按顺序：角色名, 真实身份 */
+const CHARACTERS = [
+  ['鸿雁',      '人类（激进派）'],
+  ['咩咩',      'AI（激进派）'],
+  ['迷死孙',    'AI（激进派）'],
+  ['三颗星',    'AI（激进派）'],
+  ['阿福',      'AI（激进派）'],
+  ['鱼片',      'AI（激进派）'],
+  ['侦侦',      '人类（守护者）'],
+  ['小余&小林', '人类（帮凶）'],
+  ['十七',      '人类（救世主）']
+];
+
+const board = document.getElementById('board');
+
+CHARACTERS.forEach(([name, identity]) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML =
+    '<div class="card-inner">' +
+      '<div class="face front">' + name + '</div>' +
+      '<div class="face back">' + identity + '</div>' +
+    '</div>';
+  board.appendChild(card);
+});
+
+/* 点击卡片翻转 / 再点翻回 */
+board.addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (card) card.classList.toggle('flipped');
+});
+
+/* 点击页面任意位置查看角色身份牌 */
+const stage = document.getElementById('stage');
+const boardWrap = document.getElementById('board-wrap');
+
+stage.addEventListener('click', () => {
+  stage.classList.add('hidden');
+  boardWrap.classList.add('show');
+}, { once: true });
+</script>
+</body>
+</html>
